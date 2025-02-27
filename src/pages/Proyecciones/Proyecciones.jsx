@@ -97,7 +97,7 @@ function Proyecciones() {
             const onChange = (e) => dispatch(setData(e.formData));
             const onError = (e) => console.log('errors');
 
-            return (<ListItem><Accordion >
+            return (<ListItem><Accordion  sx={{width: '100vw'}} >
                 <AccordionSummary expandIcon={<ExpandMore />} children={<Typography children={'General'} fontWeight={600} />} />
                 <AccordionDetails>
                     <Form schema={schema} validator={validator} onChange={onChange} onError={onError}>
@@ -1146,7 +1146,7 @@ function Proyecciones() {
             return (
                 <>
                     {cashflows?.map((cf, i) => {
-                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion >
+                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion sx={{width: '100vw'}}>
                             <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} />} />
                             <AccordionDetails>
                                 <ConfiguracionCurva cf={cf} i={i} />
@@ -1160,7 +1160,7 @@ function Proyecciones() {
 
         return (<Box sx={{ width: '100%', height: { xs: 'flex', sm: 'flex', md: '100%', lg: '100%', xl: '100%' }, flexGrow: 1, pb: '1em', backgroundColor: '#e3e3e3' }}>
             <Header />
-            <List sx={{ p:0}}>
+            <List>
                 <General />
                 <Cashflows />
             </List>
@@ -1179,11 +1179,12 @@ function Proyecciones() {
                     {/* Mobile Version */}
                     <Toolbar sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'flex', md: 'none', lg: 'none', xl: 'none' } }}>
                         {/* Menu hamburguesa */}
-                        <Box sx={{ flexGrow: 1, display: 'flex' }}>
+                        <Box >
                             <IconButton size="large" onClick={handleOpenNavMenu} color="inherit"  >
                                 <MenuIcon />
                             </IconButton>
                             <Menu
+                             sx={{ p:0}}
                                 id="menu-appbar"
                                 anchorEl={anchorElNav}
                                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
@@ -1393,18 +1394,46 @@ function Proyecciones() {
             </div>
         </div>
     };
-
-    return (<Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white' }}>
-        <TopBar />
-        <Grid2 size={3} sx={{ flexGrow: 1, display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' } }}>
-            <Parameters />
+    return (
+        <Grid2 container spacing={0} sx={{ 
+            flexGrow: 1, 
+            margin: 0, 
+            padding: 0, 
+            backgroundColor: 'white', 
+          
+            display: 'flex', 
+            flexDirection: 'column', 
+            overflow: 'hidden' // Asegura que no haya scroll en el contenedor principal
+        }}>
+            <TopBar />
+    
+            <Grid2 container sx={{ flexGrow: 1, display: 'flex' }}>
+                <Grid2 size={3} sx={{ 
+                    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' } 
+                }}>
+                    <Parameters />
+                </Grid2>
+    
+                <Grid2 size={{ xs: 12, sm: 12, md: 9, lg: 9, xl: 9 }} sx={{ 
+                    mt: { xs: '4rem', sm: '4rem', md: '2.5rem', lg: '2.5rem', xl: '2.5rem' },
+                    flexGrow: 1, 
+                  
+                }}>
+                    <Box sx={{ width: '100%', overflowY: 'auto', // Habilita el desplazamiento vertical
+                scrollbarWidth: 'none', // Especifico para Firefox
+                '::WebkitScrollbar': {
+                    display: 'none' // Especifico para WebKit (Chrome, Safari, etc.)
+                }, }}> {/* Contenedor para evitar desbordes */}
+                        <CashFlowPlot />
+                        <CashFlowTotalPlot />
+                        {/* <IndexesPlot /> */}
+                    </Box>
+                </Grid2>
+            </Grid2>
         </Grid2>
-        <Grid2  size={{ xs: 12, sm: 12, md: 9, lg: 9, xl: 9 }}>
-            <CashFlowPlot />
-            <CashFlowTotalPlot />
-            {/* <IndexesPlot /> */}
-        </Grid2>
-    </Grid2>);
+    );
+    
+    
 }
 
 export default Proyecciones;
