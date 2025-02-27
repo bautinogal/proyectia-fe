@@ -7,12 +7,13 @@ import { cleanError, cleanMessage, getData, setData } from './ProyeccionesSlice'
 import { ResponsiveChartContainer, LineChart, LinePlot, ChartsXAxis, ChartsYAxis, ChartsTooltip, MarkPlot, ChartsGrid, ChartsReferenceLine, AreaPlot, BarChart, BarPlot } from "@mui/x-charts";
 
 import {
-    Accordion, AccordionActions, AccordionSummary, AccordionDetails, Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid2,
-    IconButton, InputLabel, MenuItem, Select, Slider, TextField, Typography, InputAdornment, Paper, Icon
+    Accordion, AccordionActions, AccordionSummary, AccordionDetails, AppBar, Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid2,
+    IconButton, InputLabel, List, ListItem,Menu, MenuItem, Select, Slider, TextField, Toolbar, Typography, InputAdornment, Paper, Icon
 } from '@mui/material';
 
 import { ChromePicker } from 'react-color';
 import { Add, Build, Circle, Delete, Download, Edit, ExpandMore, ColorLens, Colorize } from '@mui/icons-material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 import Form from '@rjsf/mui';
 import validator from '@rjsf/validator-ajv8';
@@ -21,7 +22,7 @@ import { MathFunction, MathFunctionsTemplates } from "../../mathFunctions/index.
 
 import { styled } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';
-
+import theme from "../../theme.js"
 const CustomFunctionSvgIcon = (props) => {
     const StyledIcon = styled(SvgIcon)(({ theme }) => ({ color: theme.palette.primary.main, fontSize: '2rem' }));
 
@@ -72,11 +73,8 @@ function Proyecciones() {
     const Parameters = () => {
 
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
-            <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, padding: '0rem', paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
-                <Grid2 size={11}>
-                    {/* <Typography variant="h6" component="h2" gutterBottom color='black' children={'Flujo de Fondos'} /> */}
-                </Grid2>
-                <Grid2 size={1} sx={{ textAlignLast: 'end' }}>
+            <Grid2 container spacing={0} justifyContent='flex-end' sx={{ mr: '2rem' }}>
+                <Grid2 size={1}>
                     <IconButton size="large" children={<Add />} color="success" />
                 </Grid2>
             </Grid2>
@@ -99,14 +97,16 @@ function Proyecciones() {
             const onChange = (e) => dispatch(setData(e.formData));
             const onError = (e) => console.log('errors');
 
-            return (<Accordion >
+            return (<ListItem><Accordion >
                 <AccordionSummary expandIcon={<ExpandMore />} children={<Typography children={'General'} fontWeight={600} />} />
                 <AccordionDetails>
                     <Form schema={schema} validator={validator} onChange={onChange} onError={onError}>
-                        {'s'}
+                        {''}
                     </Form>
                 </AccordionDetails>
-            </Accordion>)
+            </Accordion>
+            </ListItem>
+            )
         };
 
         const Cashflows = () => {
@@ -203,7 +203,7 @@ function Proyecciones() {
                                 serialized = newSmoothStepBell({ y1: 0.9 }, { minX: 0, maxX: 23 }).serialize();
                                 break;
                             case 'InstallmentRevenue':
-                                serialized = newInstallmentRevenue({ initialX: 0, totalUnits: 2400, unitsPerSale: 300, salesStepSize: 1, pricePerUnit: 1, installments: 24,  minX: 0, maxX: 36 }, { minX: 0, maxX: 23 }).serialize();
+                                serialized = newInstallmentRevenue({ initialX: 0, totalUnits: 2400, unitsPerSale: 300, salesStepSize: 1, pricePerUnit: 1, installments: 24, minX: 0, maxX: 36 }, { minX: 0, maxX: 23 }).serialize();
                                 break;
                             case 'Discrete':
                                 serialized = newDiscrete({ points: [{ x: 0.2, y: 0.5 }, { x: 0.5, y: 0.9 }, { x: 0.8, y: 0.7 }], tolerance: 0.01, defaultVal: -1 }).serialize();
@@ -1143,23 +1143,71 @@ function Proyecciones() {
                 </>
             };
 
-            return cashflows?.map((cf, i) => <Accordion key={`params-cashflow-${cf.name}-${i}`}>
-                <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} />} />
-                <AccordionDetails>
-                    <ConfiguracionCurva cf={cf} i={i} />
-                </AccordionDetails>
-            </Accordion>)
+            return (
+                <>
+                    {cashflows?.map((cf, i) => {
+                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion >
+                            <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} />} />
+                            <AccordionDetails>
+                                <ConfiguracionCurva cf={cf} i={i} />
+                            </AccordionDetails>
+                        </Accordion></ListItem>
+                    })
+                    }
+                </>
+            )
         };
 
-        return (<Card sx={{ width: '100%', height: '100vh', padding: 0, backgroundColor: '#e3e3e3' }}>
+        return (<Box sx={{ width: '100%', height: { xs: 'flex', sm: 'flex', md: '100%', lg: '100%', xl: '100%' }, flexGrow: 1, pb: '1em', backgroundColor: '#e3e3e3' }}>
             <Header />
-            <CardContent>
+            <List sx={{ p:0}}>
                 <General />
                 <Cashflows />
-            </CardContent>
-        </Card>);
+            </List>
+        </Box>);
     };
+    const TopBar = () => {
+        const Bar = () => {
+            const [anchorElNav, setAnchorElNav] = React.useState(null);
 
+            const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
+            const handleCloseNavMenu = () => setAnchorElNav(null);
+
+            return (
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, width: '100%', left: 0, backgroundColor: theme.palette.secondary.main}}>
+
+                    {/* Mobile Version */}
+                    <Toolbar sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'flex', md: 'none', lg: 'none', xl: 'none' } }}>
+                        {/* Menu hamburguesa */}
+                        <Box sx={{ flexGrow: 1, display: 'flex' }}>
+                            <IconButton size="large" onClick={handleOpenNavMenu} color="inherit"  >
+                                <MenuIcon />
+                            </IconButton>
+                            <Menu
+                                id="menu-appbar"
+                                anchorEl={anchorElNav}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                keepMounted
+                                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                open={Boolean(anchorElNav)}
+                                onClose={handleCloseNavMenu}
+                            >
+
+                                <Parameters />
+                            </Menu>
+                        </Box>
+
+                    </Toolbar>
+                </AppBar>)
+        };
+
+
+        return (
+            <div>
+                <Bar></Bar>
+            </div>
+        )
+    };
     const CashFlowPlot = () => {
 
         const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
@@ -1347,10 +1395,11 @@ function Proyecciones() {
     };
 
     return (<Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white' }}>
-        <Grid2 size={3} >
+        <TopBar />
+        <Grid2 size={3} sx={{ flexGrow: 1, display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' } }}>
             <Parameters />
         </Grid2>
-        <Grid2 size={9}>
+        <Grid2  size={{ xs: 12, sm: 12, md: 9, lg: 9, xl: 9 }}>
             <CashFlowPlot />
             <CashFlowTotalPlot />
             {/* <IndexesPlot /> */}
