@@ -115,7 +115,7 @@ function Proyecciones() {
 
             const getIndex = (id) => indexes.find(x => x.id === id);
 
-            const AccordionHeader = ({ cf }) => {
+            const AccordionHeader = ({ cf, i }) => {
                 const ColorPicker = () => {
                     const [color, setColor] = useState(cf.color); // Color seleccionado
                     const [open, setOpen] = useState(false); // Estado del diálogo
@@ -131,7 +131,7 @@ function Proyecciones() {
                             </IconButton>
 
                             {/* Diálogo con el color picker */}
-                            <Dialog open={open} onClose={(e) => (e.stopPropagation(), setOpen(false))} id='color-picker-dialog'>
+                            <Dialog open={open} onClose={(e) => {dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) }));(e.stopPropagation(), setOpen(false))}} id='color-picker-dialog'>
                                 <DialogTitle>
 
                                     {cf.name}
@@ -140,7 +140,7 @@ function Proyecciones() {
                                     <ChromePicker color={color} onChange={handleColorChange} />
                                 </DialogContent>
                                 <DialogActions>
-                                    <Button onClick={(e) => (e.stopPropagation(), setOpen(false))} color="primary">
+                                    <Button onClick={(e) => {dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) }));(e.stopPropagation(), setOpen(false))}} color="primary">
                                         Guardar
                                     </Button>
                                 </DialogActions>
@@ -1147,7 +1147,7 @@ function Proyecciones() {
                 <>
                     {cashflows?.map((cf, i) => {
                         return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion sx={{width: '100vw'}}>
-                            <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} />} />
+                            <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} i={i} />} />
                             <AccordionDetails>
                                 <ConfiguracionCurva cf={cf} i={i} />
                             </AccordionDetails>
