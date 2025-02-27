@@ -133,7 +133,6 @@ function Proyecciones() {
                             {/* Diálogo con el color picker */}
                             <Dialog open={open} onClose={(e) => {dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) }));(e.stopPropagation(), setOpen(false))}} id='color-picker-dialog'>
                                 <DialogTitle>
-
                                     {cf.name}
                                 </DialogTitle>
                                 <DialogContent>
@@ -515,10 +514,10 @@ function Proyecciones() {
                     };
 
                     const ParametrosSmoothstep = () => {
-
+                       
                         const { x0, x1, y0, y1, N } = cf?.serialized?.meta;
-
                         const SliderPeriodo = () => {
+                            
                             const minDistance = 1;
 
                             const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
@@ -542,7 +541,7 @@ function Proyecciones() {
                             };
 
                             const handleCommit = (event, newValue, activeThumb) => {
-                                console.log({ sliderVal })
+                               // console.log({ sliderVal })
                                 const func = MathFunctionsTemplates.newSmoothStep({ x0: sliderVal[0], x1: sliderVal[1], y0, y1, N }, { minX: sliderVal[0], maxX: sliderVal[1], minY, maxY }).serialize();
                                 dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
 
@@ -689,13 +688,14 @@ function Proyecciones() {
                     };
 
                     const ParametrosSmoothstepBell = () => {
+                  
                         const funcs = cf?.serialized?.funcs;
                         const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
 
                         const SliderPeriodo = () => {
                             const minDistance = 1;
 
-                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+                            //const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
                             const [sliderVal, setSliderVal] = useState([minX, maxX]);
 
                             const valueLabelFormat = (value) => `Mes ${value}`;
@@ -716,8 +716,7 @@ function Proyecciones() {
                             };
 
                             const handleCommit = (event, newValue, activeThumb) => {
-                                console.log({ sliderVal })
-                                const func = MathFunctionsTemplates.newSmoothStep({ x0: sliderVal[0], x1: sliderVal[1], y0, y1, N }, { minX: sliderVal[0], maxX: sliderVal[1], minY, maxY }).serialize();
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: sliderVal[0], x1: sliderVal[1], y0, y1, N1, N2 }, { minX: sliderVal[0], maxX: sliderVal[1], minY, maxY }).serialize();
                                 dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
 
                             };
@@ -810,11 +809,10 @@ function Proyecciones() {
                             />;
                         };
 
-                        const ValorNInput = () => {
+                        const ValorN1Input = () => {
 
-                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
-
-                            const [displayedValue, setDisplayedValue] = useState(formatNumber(N).validInput);
+                            const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(N1).validInput);
 
                             const handleChange = (event) => {
                                 let inputValue = parseInt(event.target.value);
@@ -826,7 +824,7 @@ function Proyecciones() {
                                 let inputValue = Math.max(1, Math.min(10, parseFloat(event.target.value)));
 
                                 const { formattedValue, validInput } = formatNumber(inputValue);
-                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1, N: parseInt(validInput) }, { minX, maxX, minY, maxY }).serialize();
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1, N1: parseInt(validInput) }, { minX, maxX, minY, maxY }).serialize();
                                 setDisplayedValue(formattedValue);
                                 dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
                             };
@@ -835,7 +833,7 @@ function Proyecciones() {
                                 value={displayedValue}
                                 onChange={handleChange}
                                 onBlur={onBlur}
-                                label="Valor N"
+                                label="Valor N1"
                                 variant="outlined"
                                 fullWidth
                             // slotProps={{
@@ -845,7 +843,40 @@ function Proyecciones() {
                             // }}
                             />;
                         };
+                        const ValorN2Input = () => {
 
+                            const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(N2).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = parseInt(event.target.value);
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = Math.max(1, Math.min(10, parseFloat(event.target.value)));
+
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1, N2: parseInt(validInput) }, { minX, maxX, minY, maxY }).serialize();
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor N2"
+                                variant="outlined"
+                                fullWidth
+                            // slotProps={{
+                            //     input: {
+                            //         startAdornment: <InputAdornment position="start">{getIndex(cf?.unitId)?.label}</InputAdornment>,
+                            //     },
+                            // }}
+                            />;
+                        };
                         return <Grid2 container spacing={0} sx={{ margin: 0, paddingTop: '1rem', }}>
                             <Grid2 size={12} >
                                 <SliderPeriodo />
@@ -857,7 +888,10 @@ function Proyecciones() {
                                 <ValorFinalInput />
                             </Grid2>
                             <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
-                                <ValorNInput />
+                                <ValorN1Input />
+                            </Grid2>
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorN2Input />
                             </Grid2>
                         </Grid2>
                     };
@@ -983,7 +1017,7 @@ function Proyecciones() {
                         constant: ParametrosConstante,
                         line: ParametrosLine,
                         smoothstep: ParametrosSmoothstep,
-                        smoothStepBell: ParametrosSmoothstepBell,
+                        smoothstepbell: ParametrosSmoothstepBell,
                         discrete: null,
                         multi: null,
                         custom: ParametrosCustom
