@@ -8,7 +8,7 @@ import { ResponsiveChartContainer, LineChart, LinePlot, ChartsXAxis, ChartsYAxis
 
 import {
     Accordion, AccordionActions, AccordionSummary, AccordionDetails, AppBar, Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid2,
-    IconButton, InputLabel, List, ListItem, Menu, MenuItem, Select, Slider, TextField, Toolbar, Typography, InputAdornment, Paper, Icon
+    IconButton, InputLabel, List, ListItem, Menu, MenuItem, Select, Slider, TextField, Toolbar, Tooltip, Typography, InputAdornment, Paper, Icon
 } from '@mui/material';
 
 import { ChromePicker } from 'react-color';
@@ -1318,7 +1318,7 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <IconButton size="large" children={<Download />} onClick={() => handleDownloadXLS()} />
+                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Download />} onClick={() => handleDownloadXLS()} />} /> 
                 </Grid2>
             </Grid2>
         </div>;
@@ -1398,7 +1398,7 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <IconButton size="large" children={<Download />} />
+                    {/* <IconButton size="large" children={<Download />} /> */}
                 </Grid2>
             </Grid2>
         </div>;
