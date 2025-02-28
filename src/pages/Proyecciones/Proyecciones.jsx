@@ -8,7 +8,7 @@ import { ResponsiveChartContainer, LineChart, LinePlot, ChartsXAxis, ChartsYAxis
 
 import {
     Accordion, AccordionActions, AccordionSummary, AccordionDetails, AppBar, Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid2,
-    IconButton, InputLabel, List, ListItem,Menu, MenuItem, Select, Slider, TextField, Toolbar, Typography, InputAdornment, Paper, Icon
+    IconButton, InputLabel, List, ListItem, Menu, MenuItem, Select, Slider, TextField, Toolbar, Typography, InputAdornment, Paper, Icon
 } from '@mui/material';
 
 import { ChromePicker } from 'react-color';
@@ -22,6 +22,8 @@ import { MathFunction, MathFunctionsTemplates } from "../../mathFunctions/index.
 
 import { styled } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';
+import * as XLSX from 'xlsx';
+
 import theme from "../../theme.js"
 const CustomFunctionSvgIcon = (props) => {
     const StyledIcon = styled(SvgIcon)(({ theme }) => ({ color: theme.palette.primary.main, fontSize: '2rem' }));
@@ -69,7 +71,17 @@ const formatNumber = (value) => {
 function Proyecciones() {
 
     const dispatch = useDispatch();
-
+    const useIsMobile = () => {
+        const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    
+        useEffect(() => {
+            const handleResize = () => setIsMobile(window.innerWidth <= 768);
+            window.addEventListener("resize", handleResize);
+            return () => window.removeEventListener("resize", handleResize);
+        }, []);
+    
+        return isMobile;
+    };
     const Parameters = () => {
 
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
@@ -81,12 +93,13 @@ function Proyecciones() {
         </div>;
 
         const General = () => {
+            const { duration, title } = useSelector(state => state.proyecciones?.data);
             const schema = {
                 type: 'object',
                 required: ['title'],
                 properties: {
-                    title: { type: 'string', title: 'Nombre', default: 'Nombre del Proyecto' },
-                    duration: { type: 'number', title: 'Duración', default: 36 },
+                    title: { type: 'string', title: 'Nombre', default: title },
+                    duration: { type: 'number', title: 'Duración', default: duration },
                     // estTotalM2: { type: 'number', title: 'M2 Totales', default: 1000 },
                     // estSellableM2: { type: 'number', title: 'M2 Vendibles', default: 800 },
                     // estParkingLots: { type: 'number', title: 'Cocheras', default: 8 },
@@ -94,10 +107,10 @@ function Proyecciones() {
                 },
             };
 
-            const onChange = (e) => dispatch(setData(e.formData));
+            const onChange = (e) => {dispatch(setData(e.formData))};
             const onError = (e) => console.log('errors');
 
-            return (<ListItem><Accordion  sx={{width: '100vw'}} >
+            return (<ListItem><Accordion sx={{ width: '100vw' }} >
                 <AccordionSummary expandIcon={<ExpandMore />} children={<Typography children={'General'} fontWeight={600} />} />
                 <AccordionDetails>
                     <Form schema={schema} validator={validator} onChange={onChange} onError={onError}>
@@ -131,7 +144,7 @@ function Proyecciones() {
                             </IconButton>
 
                             {/* Diálogo con el color picker */}
-                            <Dialog open={open} onClose={(e) => {dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) }));(e.stopPropagation(), setOpen(false))}} id='color-picker-dialog'>
+                            <Dialog open={open} onClose={(e) => { dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) })); (e.stopPropagation(), setOpen(false)) }} id='color-picker-dialog'>
                                 <DialogTitle>
                                     {cf.name}
                                 </DialogTitle>
@@ -139,7 +152,7 @@ function Proyecciones() {
                                     <ChromePicker color={color} onChange={handleColorChange} />
                                 </DialogContent>
                                 <DialogActions>
-                                    <Button onClick={(e) => {dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) }));(e.stopPropagation(), setOpen(false))}} color="primary">
+                                    <Button onClick={(e) => { dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) })); (e.stopPropagation(), setOpen(false)) }} color="primary">
                                         Guardar
                                     </Button>
                                 </DialogActions>
@@ -514,10 +527,10 @@ function Proyecciones() {
                     };
 
                     const ParametrosSmoothstep = () => {
-                       
+
                         const { x0, x1, y0, y1, N } = cf?.serialized?.meta;
                         const SliderPeriodo = () => {
-                            
+
                             const minDistance = 1;
 
                             const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
@@ -541,7 +554,6 @@ function Proyecciones() {
                             };
 
                             const handleCommit = (event, newValue, activeThumb) => {
-                               // console.log({ sliderVal })
                                 const func = MathFunctionsTemplates.newSmoothStep({ x0: sliderVal[0], x1: sliderVal[1], y0, y1, N }, { minX: sliderVal[0], maxX: sliderVal[1], minY, maxY }).serialize();
                                 dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
 
@@ -688,7 +700,7 @@ function Proyecciones() {
                     };
 
                     const ParametrosSmoothstepBell = () => {
-                  
+
                         const funcs = cf?.serialized?.funcs;
                         const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
 
@@ -1180,7 +1192,7 @@ function Proyecciones() {
             return (
                 <>
                     {cashflows?.map((cf, i) => {
-                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion sx={{width: '100vw'}}>
+                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion sx={{ width: '100vw' }}>
                             <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} i={i} />} />
                             <AccordionDetails>
                                 <ConfiguracionCurva cf={cf} i={i} />
@@ -1208,7 +1220,7 @@ function Proyecciones() {
             const handleCloseNavMenu = () => setAnchorElNav(null);
 
             return (
-                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, width: '100%', left: 0, backgroundColor: theme.palette.secondary.main}}>
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, width: '100%', left: 0, backgroundColor: theme.palette.secondary.main }}>
 
                     {/* Mobile Version */}
                     <Toolbar sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'flex', md: 'none', lg: 'none', xl: 'none' } }}>
@@ -1218,7 +1230,7 @@ function Proyecciones() {
                                 <MenuIcon />
                             </IconButton>
                             <Menu
-                             sx={{ p:0}}
+                                sx={{ p: 0 }}
                                 id="menu-appbar"
                                 anchorEl={anchorElNav}
                                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
@@ -1244,7 +1256,7 @@ function Proyecciones() {
         )
     };
     const CashFlowPlot = () => {
-
+        const isMobile = useIsMobile();
         const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
         const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
 
@@ -1260,10 +1272,10 @@ function Proyecciones() {
                 label: cf.name,
                 data: getPlotData(cf, duration),
                 color: cf.color,
-                showMark: true
+                showMark: !isMobile
             }
         });
-
+       
         // Agregar la serie de la recta
         series.push({
             id: 'Resultante',
@@ -1274,7 +1286,31 @@ function Proyecciones() {
             xAxisId: 'x-axis-id',
             showMark: false, // Opcional: muestra puntos en la línea
         });
-
+        const handleDownloadXLS = () => {
+            const columns = xAxis[0]?.data;
+            if (!Array.isArray(columns) || !Array.isArray(series)) {
+                console.error('xAxis y series deben ser arrays válidos', typeof columns);
+                return;
+            }
+        
+            // Construir los encabezados asegurando que xAxis contiene solo números
+            const headers = ['Categorias', ...columns.map(num => `Mes ${String(num)}`)];
+            
+            // Construir los datos asegurando que cada fila tenga la misma longitud
+            const data = series.map(item => [
+                `${item.label} US$`,
+                ...columns.map((_, index) => item.data[index] ?? '-')
+            ]);
+            
+            // Crear la hoja de cálculo
+            const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
+            
+            // Descargar el archivo Excel
+            XLSX.writeFile(workbook, `Flujo_de_Fondos.xlsx`);
+        }
+        
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
             <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
                 <Grid2 size={8}>
@@ -1282,7 +1318,7 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <IconButton size="large" children={<Download />} />
+                    <IconButton size="large" children={<Download />} onClick={() => handleDownloadXLS()} />
                 </Grid2>
             </Grid2>
         </div>;
@@ -1429,35 +1465,37 @@ function Proyecciones() {
         </div>
     };
     return (
-        <Grid2 container spacing={0} sx={{ 
-            flexGrow: 1, 
-            margin: 0, 
-            padding: 0, 
-            backgroundColor: 'white', 
-          
-            display: 'flex', 
-            flexDirection: 'column', 
+        <Grid2 container spacing={0} sx={{
+            flexGrow: 1,
+            margin: 0,
+            padding: 0,
+            backgroundColor: 'white',
+
+            display: 'flex',
+            flexDirection: 'column',
             overflow: 'hidden' // Asegura que no haya scroll en el contenedor principal
         }}>
             <TopBar />
-    
+
             <Grid2 container sx={{ flexGrow: 1, display: 'flex' }}>
-                <Grid2 size={3} sx={{ 
-                    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' } 
+                <Grid2 size={3} sx={{
+                    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' }
                 }}>
                     <Parameters />
                 </Grid2>
-    
-                <Grid2 size={{ xs: 12, sm: 12, md: 9, lg: 9, xl: 9 }} sx={{ 
+
+                <Grid2 size={{ xs: 12, sm: 12, md: 9, lg: 9, xl: 9 }} sx={{
                     mt: { xs: '4rem', sm: '4rem', md: '2.5rem', lg: '2.5rem', xl: '2.5rem' },
-                    flexGrow: 1, 
-                  
+                    flexGrow: 1,
+
                 }}>
-                    <Box sx={{ width: '100%', overflowY: 'auto', // Habilita el desplazamiento vertical
-                scrollbarWidth: 'none', // Especifico para Firefox
-                '::WebkitScrollbar': {
-                    display: 'none' // Especifico para WebKit (Chrome, Safari, etc.)
-                }, }}> {/* Contenedor para evitar desbordes */}
+                    <Box sx={{
+                        width: '100%', overflowY: 'auto', // Habilita el desplazamiento vertical
+                        scrollbarWidth: 'none', // Especifico para Firefox
+                        '::WebkitScrollbar': {
+                            display: 'none' // Especifico para WebKit (Chrome, Safari, etc.)
+                        },
+                    }}> {/* Contenedor para evitar desbordes */}
                         <CashFlowPlot />
                         <CashFlowTotalPlot />
                         {/* <IndexesPlot /> */}
@@ -1466,8 +1504,8 @@ function Proyecciones() {
             </Grid2>
         </Grid2>
     );
-    
-    
+
+
 }
 
 export default Proyecciones;
