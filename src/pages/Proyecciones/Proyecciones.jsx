@@ -19,7 +19,7 @@ import Form from '@rjsf/mui';
 import validator from '@rjsf/validator-ajv8';
 
 import { MathFunction, MathFunctionsTemplates } from "../../mathFunctions/index.js";
-
+import { main } from "../../aiAPI/index.js"
 import { styled } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';
 import * as XLSX from 'xlsx';
@@ -71,15 +71,16 @@ const formatNumber = (value) => {
 function Proyecciones() {
 
     const dispatch = useDispatch();
+    
     const useIsMobile = () => {
         const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-    
+
         useEffect(() => {
             const handleResize = () => setIsMobile(window.innerWidth <= 768);
             window.addEventListener("resize", handleResize);
             return () => window.removeEventListener("resize", handleResize);
         }, []);
-    
+
         return isMobile;
     };
     const Parameters = () => {
@@ -96,7 +97,7 @@ function Proyecciones() {
             const { duration, title } = useSelector(state => state.proyecciones?.data);
             const schema = {
                 type: 'object',
-                required: ['title'],
+                required: ['duration'],
                 properties: {
                     title: { type: 'string', title: 'Nombre', default: title },
                     duration: { type: 'number', title: 'Duración', default: duration },
@@ -107,15 +108,15 @@ function Proyecciones() {
                 },
             };
 
-            const onChange = (e) => {dispatch(setData(e.formData))};
+            const onChange = (e) => { dispatch(setData(e.formData)) };
             const onError = (e) => console.log('errors');
-
             return (<ListItem><Accordion sx={{ width: '100vw' }} >
                 <AccordionSummary expandIcon={<ExpandMore />} children={<Typography children={'General'} fontWeight={600} />} />
                 <AccordionDetails>
-                    <Form schema={schema} validator={validator} onChange={onChange} onError={onError}>
-                        {''}
+                    <Form schema={schema} validator={validator}   onSubmit={onChange} onError={onError}>
+                       
                     </Form>
+                   
                 </AccordionDetails>
             </Accordion>
             </ListItem>
@@ -125,7 +126,6 @@ function Proyecciones() {
         const Cashflows = () => {
 
             const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
-
             const getIndex = (id) => indexes.find(x => x.id === id);
 
             const AccordionHeader = ({ cf, i }) => {
@@ -176,9 +176,8 @@ function Proyecciones() {
             };
 
             const ConfiguracionCurva = ({ cf, i }) => {
-
+             
                 const duration = useSelector(state => state.proyecciones?.data?.duration);
-
                 const TipoCurva = () => {
 
                     const { newConstant, newLine, newSmoothStep, newSmoothStepBell, newDiscrete, newInstallmentRevenue } = MathFunctionsTemplates;
@@ -1259,7 +1258,7 @@ function Proyecciones() {
         const isMobile = useIsMobile();
         const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
         const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
-
+     
         const series = cashflows.map(cf => {
             const getPlotData = (cf, duration) => {
                 const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
@@ -1275,7 +1274,7 @@ function Proyecciones() {
                 showMark: !isMobile
             }
         });
-       
+
         // Agregar la serie de la recta
         series.push({
             id: 'Resultante',
@@ -1292,25 +1291,25 @@ function Proyecciones() {
                 console.error('xAxis y series deben ser arrays válidos', typeof columns);
                 return;
             }
-        
+
             // Construir los encabezados asegurando que xAxis contiene solo números
             const headers = ['Categorias', ...columns.map(num => `Mes ${String(num)}`)];
-            
+
             // Construir los datos asegurando que cada fila tenga la misma longitud
             const data = series.map(item => [
                 `${item.label} US$`,
                 ...columns.map((_, index) => item.data[index] ?? '-')
             ]);
-            
+
             // Crear la hoja de cálculo
             const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
-            
+
             // Descargar el archivo Excel
             XLSX.writeFile(workbook, `Flujo_de_Fondos.xlsx`);
         }
-        
+
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
             <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
                 <Grid2 size={8}>
@@ -1318,7 +1317,7 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Download />} onClick={() => handleDownloadXLS()} />} /> 
+                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Download />} onClick={() => handleDownloadXLS()} />} />
                 </Grid2>
             </Grid2>
         </div>;
@@ -1335,7 +1334,10 @@ function Proyecciones() {
 
             </ResponsiveChartContainer>
         </div>;
-
+        //main(series)
+        // console.log({series: series.reduce((acc,x)=> {
+        //    return acc + `\n ${x.label}: The cost and benefits of this variable along the month are: ${JSON.stringify(x.data?.map((j,i)=> ({ [`Mes ${i}`]: `US $ ${j}`})))}`
+        //   }, "")})
         return <div style={{ width: "100%", height: "50vh" }}>
             <Header />
             <Plot />
@@ -1464,6 +1466,7 @@ function Proyecciones() {
             </div>
         </div>
     };
+
     return (
         <Grid2 container spacing={0} sx={{
             flexGrow: 1,

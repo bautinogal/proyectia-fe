@@ -37,7 +37,9 @@ const proyeccionesSlice = createSlice({
         cleanError: create.reducer((state, action) => ({ ...state, error: null })),
         cleanMessage: create.reducer((state, action) => ({ ...state, message: null })),
 
-        setData: create.reducer((state, action) =>{({ ...state, data: { ...state.data, ...action.payload } })}),
+        setData: create.reducer((state, action) => {
+            return { ...state, data: { ...state.data, ...action.payload } };
+        }),
     })
 });
 
