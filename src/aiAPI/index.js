@@ -105,6 +105,7 @@ export const main = async (data) => {
     });
 
     console.log("AI Response:", completion.choices[0].message.content);
+    return completion.choices[0].message.content
   } catch (error) {
     console.error("Error calling API:", error);
   }

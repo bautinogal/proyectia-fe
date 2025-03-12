@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 
 import { ChromePicker } from 'react-color';
-import { Add, Build, Circle, Delete, Download, Edit, ExpandMore, ColorLens, Colorize } from '@mui/icons-material';
+import { Add, Build, Circle, Delete, Download, Edit, ExpandMore, ColorLens, Colorize, Description, Dataset } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 import Form from '@rjsf/mui';
@@ -1309,7 +1309,10 @@ function Proyecciones() {
             // Descargar el archivo Excel
             XLSX.writeFile(workbook, `Flujo_de_Fondos.xlsx`);
         }
-
+        const handleDownloadPDF = async () => {
+            let res = await main(series)
+            console.log({res})
+        }
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
             <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
                 <Grid2 size={8}>
@@ -1317,7 +1320,8 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Download />} onClick={() => handleDownloadXLS()} />} />
+                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Dataset/>} onClick={() => handleDownloadXLS()} />} />
+                    <Tooltip title='Descargar Reporte' children={<IconButton size="large" children={<Description/>} onClick={() => handleDownloadPDF()} />} />
                 </Grid2>
             </Grid2>
         </div>;
