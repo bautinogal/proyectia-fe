@@ -1867,9 +1867,11 @@ function Proyecciones() {
         return (<Box sx={{ width: '100%', height: { xs: 'flex', sm: 'flex', md: '100%', lg: '100%', xl: '100%' }, flexGrow: 1, pb: '1em', backgroundColor: '#e3e3e3' }}>
             <Header />
             <List>
+                <Typography variant="h6" children='Proyecto:' sx={{ pl: '17px', pb: '5px' }} />
                 <General />
                 <Cashflows />
                 <Divider />
+                <Typography variant="h6" children='Índices:' sx={{ p: '17px', pb: '5px' }} />
                 <Indexes />
             </List>
         </Box>);
@@ -2065,7 +2067,7 @@ function Proyecciones() {
         const { newConstant, newLine, newSmoothStep, newSmoothStepBell, newDiscrete, newInstallmentRevenue } = MathFunctionsTemplates;
 
         const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
-    
+
 
         // Configuración de las series
         const series = indexes.map(cf => {
