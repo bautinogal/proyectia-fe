@@ -1386,16 +1386,19 @@ function Proyecciones() {
     };
 
     const IndexesPlot = () => {
-        const { general, land } = useSelector(state => state.proyecciones?.data?.parameters);
-        const range = Array.from({ length: general.period[1] - general.period[0] + 1 }, (_, i) => general.period[0] + i);
-
-        const xAxis = [{ data: range, id: 'x-axis-id' }];
+        const { duration } = useSelector(state => state.proyecciones?.data);
+        const range = Array.from({ length: duration }, (_, i) => i)
+        //const range = Array.from({ length: general.period[1] - general.period[0] + 1 }, (_, i) => general.period[0] + i);
+        const { newConstant, newLine, newSmoothStep, newSmoothStepBell, newDiscrete, newInstallmentRevenue } = MathFunctionsTemplates;
+        console.log({range})
+        const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
         const smoothStep = newSmoothStep(3);
 
         const series = [
             { type: 'line', label: 'CAC', data: range.map(x => (0.5 + (x / range.length) / 10) * 3000) },
             { type: 'line', label: 'Dolar Blue', data: range.map(x => (0.3 + (x / range.length) * (x / range.length) / 5) * 4000) },
-            { type: 'line', label: 'Precio M2 Prom', data: range.map(x => (0.5 + smoothStep(x / range.length) / 2) * 4000), showMark: true },
+            //{ type: 'line', label: 'Precio M2 Prom', data: range.map(x => (0.5 + newSmoothStep(x / range.length) / 2) * 4000), showMark: true },
+            { type: 'line', label: 'Precio M2 Prom', data: range.map(x => (0.5 + (x / range.length) / 2) * 4000), showMark: true },
         ];
 
         return <div style={{ width: "100%", height: "45vh" }}>
@@ -1460,7 +1463,7 @@ function Proyecciones() {
                 }, }}> {/* Contenedor para evitar desbordes */}
                         <CashFlowPlot />
                         <CashFlowTotalPlot />
-                        {/* <IndexesPlot /> */}
+                        <IndexesPlot />
                     </Box>
                 </Grid2>
             </Grid2>
