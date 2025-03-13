@@ -18,9 +18,9 @@ const proyeccionesSlice = createSlice({
                 { name: 'Venta', serialized: newConstant({ value: 1000 }, { minX: 0, maxX: 30 }).serialize(), unitId: 2, factB: 0.5, IIBB: 0.01, iva: 0.21, color: '#BBEE53' },
             ],
             indexes: [
-                { id: 1, name: 'CAC', label: 'CAC', serialized: newConstant({ value: 1000 }, { minX: 0, maxX: 23 }).serialize(), unit: 'CAC' },
-                { id: 2, name: 'Dolar Blue', label: 'U$', serialized: newConstant({ value: 1000 }, { minX: 0, maxX: 23 }).serialize(), unit: 'U$' },
-                { id: 3, name: 'Precio M2 Homogeneizado', label: 'M2 Hom.', serialized: newConstant({ value: 1000 }, { minX: 0, maxX: 23 }).serialize(), unit: 'm2' },
+                { id: 1, name: 'CAC', label: 'CAC', serialized: newConstant({ value: 1000 }, { minX: 0, maxX: 23 }).serialize(), unitId: 'CAC',color: '#5E4DB2' },
+                { id: 2, name: 'Dolar Blue', label: 'U$', serialized: newConstant({ value: 1000 }, { minX: 0, maxX: 23 }).serialize(), unitId: 'U$',color: '#BBEE53' },
+                { id: 3, name: 'Precio M2 Homogeneizado', label: 'M2 Hom.', serialized: newConstant({ value: 4000 }, { minX: 0, maxX: 23 }).serialize(), unitId: 'm2',color: '#FFDE59' },
             ],
         },
     },

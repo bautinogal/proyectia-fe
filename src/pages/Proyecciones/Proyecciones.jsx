@@ -7,8 +7,9 @@ import { cleanError, cleanMessage, getData, setData } from './ProyeccionesSlice'
 import { ResponsiveChartContainer, LineChart, LinePlot, ChartsXAxis, ChartsYAxis, ChartsTooltip, MarkPlot, ChartsGrid, ChartsReferenceLine, AreaPlot, BarChart, BarPlot } from "@mui/x-charts";
 
 import {
-    Accordion, AccordionActions, AccordionSummary, AccordionDetails, AppBar, Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid2,
-    IconButton, InputLabel, List, ListItem,Menu, MenuItem, Select, Slider, TextField, Toolbar, Typography, InputAdornment, Paper, Icon
+    Accordion, AccordionActions, AccordionSummary, AccordionDetails, AppBar, Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid2,
+    IconButton, InputLabel, List, ListItem, Menu, MenuItem, Select, Slider, TextField, Toolbar, Typography, InputAdornment, Paper, Icon,
+
 } from '@mui/material';
 
 import { ChromePicker } from 'react-color';
@@ -97,7 +98,7 @@ function Proyecciones() {
             const onChange = (e) => dispatch(setData(e.formData));
             const onError = (e) => console.log('errors');
 
-            return (<ListItem><Accordion  sx={{width: '100vw'}} >
+            return (<ListItem><Accordion sx={{ width: '100vw' }} >
                 <AccordionSummary expandIcon={<ExpandMore />} children={<Typography children={'General'} fontWeight={600} />} />
                 <AccordionDetails>
                     <Form schema={schema} validator={validator} onChange={onChange} onError={onError}>
@@ -131,7 +132,7 @@ function Proyecciones() {
                             </IconButton>
 
                             {/* Diálogo con el color picker */}
-                            <Dialog open={open} onClose={(e) => {dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) }));(e.stopPropagation(), setOpen(false))}} id='color-picker-dialog'>
+                            <Dialog open={open} onClose={(e) => { dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) })); (e.stopPropagation(), setOpen(false)) }} id='color-picker-dialog'>
                                 <DialogTitle>
                                     {cf.name}
                                 </DialogTitle>
@@ -139,7 +140,7 @@ function Proyecciones() {
                                     <ChromePicker color={color} onChange={handleColorChange} />
                                 </DialogContent>
                                 <DialogActions>
-                                    <Button onClick={(e) => {dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) }));(e.stopPropagation(), setOpen(false))}} color="primary">
+                                    <Button onClick={(e) => { dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, color } : x) })); (e.stopPropagation(), setOpen(false)) }} color="primary">
                                         Guardar
                                     </Button>
                                 </DialogActions>
@@ -244,6 +245,7 @@ function Proyecciones() {
                 const ParametrosCurva = () => {
 
                     const DisplayTotal = () => {
+
                         const func = new MathFunction(cf?.serialized);
                         const minX = func.getMinX();
                         const maxX = func.getMaxX();
@@ -514,10 +516,10 @@ function Proyecciones() {
                     };
 
                     const ParametrosSmoothstep = () => {
-                       
+
                         const { x0, x1, y0, y1, N } = cf?.serialized?.meta;
                         const SliderPeriodo = () => {
-                            
+
                             const minDistance = 1;
 
                             const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
@@ -541,7 +543,7 @@ function Proyecciones() {
                             };
 
                             const handleCommit = (event, newValue, activeThumb) => {
-                               // console.log({ sliderVal })
+                                // console.log({ sliderVal })
                                 const func = MathFunctionsTemplates.newSmoothStep({ x0: sliderVal[0], x1: sliderVal[1], y0, y1, N }, { minX: sliderVal[0], maxX: sliderVal[1], minY, maxY }).serialize();
                                 dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
 
@@ -688,7 +690,7 @@ function Proyecciones() {
                     };
 
                     const ParametrosSmoothstepBell = () => {
-                  
+
                         const funcs = cf?.serialized?.funcs;
                         const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
 
@@ -1180,7 +1182,7 @@ function Proyecciones() {
             return (
                 <>
                     {cashflows?.map((cf, i) => {
-                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion sx={{width: '100vw'}}>
+                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion sx={{ width: '100vw' }}>
                             <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} i={i} />} />
                             <AccordionDetails>
                                 <ConfiguracionCurva cf={cf} i={i} />
@@ -1191,12 +1193,684 @@ function Proyecciones() {
                 </>
             )
         };
+        const Indexes = () => {
+            const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
 
+            const AccordionHeader = ({ cf, i }) => {
+                const ColorPicker = () => {
+                    const [color, setColor] = useState(cf.color); // Color seleccionado
+                    const [open, setOpen] = useState(false); // Estado del diálogo
+
+                    // Maneja el cambio de color
+                    const handleColorChange = (newColor) => setColor(newColor.hex);
+
+                    return (
+                        <div style={{}}>
+                            {/* Botón para abrir el color picker */}
+                            <IconButton size="small" onClick={(e) => (e.stopPropagation(), setOpen(true))} style={{ color: '#606060', height: '1rem', width: '1rem' }}>
+                                <Edit />
+                            </IconButton>
+
+                            {/* Diálogo con el color picker */}
+                            <Dialog open={open} onClose={(e) => { dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, color } : x) })); (e.stopPropagation(), setOpen(false)) }} id='color-picker-dialog'>
+                                <DialogTitle>
+                                    {cf.name}
+                                </DialogTitle>
+                                <DialogContent>
+                                    <ChromePicker color={color} onChange={handleColorChange} />
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={(e) => { dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, color } : x) })); (e.stopPropagation(), setOpen(false)) }} color="primary">
+                                        Guardar
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        </div>
+                    );
+                };
+
+                return <Grid2 container spacing={0} sx={{ width: '100%', padding: 0, margin: 0 }}>
+                    <Grid2 size={11}>
+                        <Box display="flex" alignItems="center">
+                            <Circle sx={{ height: '0.5rem' }} style={{ color: cf.color }} />
+                            <Typography children={cf.name} fontWeight={600} />
+                        </Box>
+                    </Grid2>
+                    <Grid2 size={1} >
+                        <ColorPicker />
+                    </Grid2>
+                </Grid2 >
+
+            };
+
+            const ConfiguracionCurva = ({ cf, i }) => {
+
+                const duration = useSelector(state => state.proyecciones?.data?.duration);
+
+                const TipoCurva = () => {
+
+                    const { newConstant, newLine, newSmoothStep, newSmoothStepBell, newDiscrete, newInstallmentRevenue } = MathFunctionsTemplates;
+                    const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+
+                    const constant = newConstant({ value: 0.5 });
+                    const line = newLine({ a: 0.5, b: 0.25 });
+                    const smoothStep = newSmoothStep();
+                    const smoothStepBell = newSmoothStepBell({ y1: 0.9 });
+                    const installmentRevenue = newInstallmentRevenue({});
+                    const discrete = newDiscrete({ points: [{ x: 0.2, y: 0.5 }, { x: 0.5, y: 0.9 }, { x: 0.8, y: 0.7 }], tolerance: 0.01, defaultVal: -1 });
+                    const multi = new MathFunction({
+                        childs: [
+                            newLine({ a: 0.1, b: 0.45 }, { minX: 0.5, underflowVal: 0 }).serialize(),
+                            newSmoothStep({}, { maxX: 0.5, overflowVal: 0 }).serialize()
+                        ], exp: '0'
+                    });
+                    const custom = new MathFunction({ exp: '0.7* (pow((x*3-1.2),3)-pow(x*3-1.2,2)-(x*3-1.2)+1.2)' });
+
+                    const handleChange = (e) => {
+                        const type = e.target.value;
+                        let serialized;
+                        switch (type) {
+                            case 'Constant':
+                                serialized = newConstant({ value: 1000 }, { minX: 0, maxX: 23 }).serialize();
+                                break;
+                            case 'Line':
+                                serialized = newLine({ a: 500, b: 100 }, { minX: 0, maxX: 23 }).serialize();
+                                break;
+                            case 'Smoothstep':
+                                serialized = newSmoothStep({ x0: 0, x1: 23, y0: 0, y1: 1000, N: 1 }, { minX: 0, maxX: 23 }).serialize();
+                                break;
+                            case 'SmoothStepBell':
+                                serialized = newSmoothStepBell({ y1: 0.9 }, { minX: 0, maxX: 23 }).serialize();
+                                break;
+                            case 'InstallmentRevenue':
+                                serialized = newInstallmentRevenue({ initialX: 0, totalUnits: 2400, unitsPerSale: 300, salesStepSize: 1, pricePerUnit: 1, installments: 24, minX: 0, maxX: 36 }, { minX: 0, maxX: 23 }).serialize();
+                                break;
+                            case 'Discrete':
+                                serialized = newDiscrete({ points: [{ x: 0.2, y: 0.5 }, { x: 0.5, y: 0.9 }, { x: 0.8, y: 0.7 }], tolerance: 0.01, defaultVal: -1 }).serialize();
+                                break;
+                            case 'Multi':
+                                serialized = new MathFunction([newLine({ a: 0.1, b: 0.45 }, { minX: 0.5, underflowVal: 0 }).serialize(), newSmoothStep({}, { maxX: 0.5, overflowVal: 0 }).serialize()]).serialize();
+                                break;
+                            case 'Custom':
+                                serialized = new MathFunction({ exp: '500 * x - 5000', minX: 0, maxX: 23, meta: { label: 'Custom' } }).serialize();
+                                break;
+                            default:
+                                throw new Error('Invalid curve type');
+                        }
+
+                        dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized } : x) }));
+
+                    };
+
+                    const CurveType = ({ value, func, label }) => <div style={{ display: 'inline-flex' }}>
+                        <CustomFunctionSvgIcon func={func.evaluate} />
+                        <Typography variant="inherit" noWrap children={label} sx={{ paddingLeft: '1rem', alignContent: 'center' }} />
+                    </div>
+
+                    return <FormControl fullWidth>
+                        <InputLabel>Tipo Curva</InputLabel>
+                        <Select value={meta?.label} label="Tipo Curva" onChange={handleChange}>
+                            <MenuItem value={'Constant'} children={<CurveType value={'Constant'} func={constant} label={'Constante'} />} />
+                            <MenuItem value={'Line'} children={<CurveType value={'Line'} func={line} label={'Recta'} />} />
+                            <MenuItem value={'Smoothstep'} children={<CurveType value={'Smoothstep'} func={smoothStep} label={'Suavizado'} />} />
+                            <MenuItem value={'SmoothStepBell'} children={<CurveType value={'SmoothStepBell'} func={smoothStepBell} label={'Campana'} />} />
+                            <MenuItem value={'InstallmentRevenue'} children={<CurveType value={'InstallmentRevenue'} func={installmentRevenue} label={'Sumatoria Cuotas'} />} />
+                            <MenuItem value={'Discrete'} disabled children={<CurveType value={'Discrete'} func={discrete} label={'Discreta'} />} />
+                            <MenuItem value={'Multi'} disabled children={<CurveType value={'Multi'} func={multi} label={'Compuesta'} />} />
+                            <MenuItem value={'Custom'} children={<CurveType value={'Custom'} func={custom} label={'Custom'} />} />
+                        </Select>
+                    </FormControl>
+                };
+
+                const ParametrosCurva = () => {
+
+                    const DisplayTotal = () => {
+                        const func = new MathFunction(cf?.serialized);
+                        const minX = func.getMinX();
+                        const maxX = func.getMaxX();
+                        const total = Array(maxX - minX + 1).fill().reduce((p, x, i) => p + func.evaluate(minX + i), 0).toFixed(2).replace('.', ',');
+                        return <Typography noWrap children={`Total: ${cf.label} ${total}`} sx={{ alignItems: 'end', alignContent: 'end', textAlign: 'end', paddingTop: '1rem', fontWeight: 550 }} />;
+                    };
+
+                    const ParametrosConstante = () => {
+
+
+                        const ValorInput = () => {
+
+                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+
+                            const val = parseFloat(exp);
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(val).formattedValue);
+
+                            const handleChange = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                                //dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: { ...x.serialized, exp: func.exp } } : x) }));
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newConstant({ value: validInput }).serialize();
+                                //setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: { ...x.serialized, exp: func.exp } } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor Inicial"
+                                variant="outlined"
+                                fullWidth
+                                slotProps={{
+                                    input: {
+                                        startAdornment: <InputAdornment position="start">{cf?.label}</InputAdornment>,
+                                    },
+                                }}
+                            />;
+                        };
+
+                        return <Grid2 container spacing={0} sx={{ margin: 0, paddingTop: '1rem', }}>
+
+                            <Grid2 size={12}>
+                                <ValorInput />
+                            </Grid2>
+                        </Grid2>
+                    };
+
+                    const ParametrosLine = () => {
+                        const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+                        const { a, b } = cf?.serialized?.meta;
+
+                        const getInicial = () => b + a * minX;
+                        const getFinal = () => b + a * maxX;
+
+                        const getLineEquation = (point1, point2) => {
+                            const [x1, y1] = point1;
+                            const [x2, y2] = point2;
+
+                            if (x1 === x2) {
+                                throw new Error("Points should have diferent x value.");
+                            }
+
+                            const a = (y2 - y1) / (x2 - x1);
+                            const b = y1 - a * x1;
+
+                            return { a, b };
+                        }
+
+                        const ValorInicialInput = () => {
+
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(getInicial().toFixed(0)).formattedValue);
+
+                            const handleChange = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const point1 = [minX, parseFloat(validInput)];
+                                const point2 = [maxX, a * maxX + b];
+                                const newLine = getLineEquation(point1, point2);
+                                const func = MathFunctionsTemplates.newLine({ ...newLine }).serialize();
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: { ...func, minX, maxX, minY, maxY, } } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor Inicial"
+                                variant="outlined"
+                                fullWidth
+                                slotProps={{
+                                    input: {
+                                        startAdornment: <InputAdornment position="start">{cf?.label}</InputAdornment>,
+                                    },
+                                }}
+                            />;
+                        };
+
+                        const ValorFinalInput = () => {
+
+
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(getFinal().toFixed(0)).formattedValue);
+
+                            const handleChange = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const point1 = [minX, a * minX + b];
+                                const point2 = [maxX, parseFloat(validInput)];
+                                const newLine = getLineEquation(point1, point2);
+                                const func = MathFunctionsTemplates.newLine({ ...newLine }).serialize();
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: { ...func, minX, maxX, minY, maxY, } } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor Final"
+                                variant="outlined"
+                                fullWidth
+                                slotProps={{
+                                    input: {
+                                        startAdornment: <InputAdornment position="start">{cf?.label}</InputAdornment>,
+                                    },
+                                }}
+                            />;
+                        };
+
+                        return <Grid2 container spacing={0} >
+
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorInicialInput />
+                            </Grid2>
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorFinalInput />
+                            </Grid2>
+                        </Grid2>
+                    };
+
+                    const ParametrosSmoothstep = () => {
+
+                        const { x0, x1, y0, y1, N } = cf?.serialized?.meta;
+
+                        const ValorInicialInput = () => {
+
+                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(y0).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: parseInt(minX), x1: parseInt(maxX), y0: parseFloat(validInput), y1, N }, { minX, maxX, minY, maxY }).serialize();
+
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor Inicial"
+                                variant="outlined"
+                                fullWidth
+                                slotProps={{ input: { startAdornment: <InputAdornment position="start" children={cf?.label} /> } }}
+                            />;
+                        };
+
+                        const ValorFinalInput = () => {
+
+                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(y1).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1: validInput, N }, { minX, maxX, minY, maxY }).serialize();
+
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor Final"
+                                variant="outlined"
+                                fullWidth
+                                slotProps={{
+                                    input: {
+                                        startAdornment: <InputAdornment position="start">{cf?.label}</InputAdornment>,
+                                    },
+                                }}
+                            />;
+                        };
+
+                        const ValorNInput = () => {
+
+                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(N).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = parseInt(event.target.value);
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = Math.max(1, Math.min(10, parseFloat(event.target.value)));
+
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1, N: parseInt(validInput) }, { minX, maxX, minY, maxY }).serialize();
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor N"
+                                variant="outlined"
+                                fullWidth
+                            // slotProps={{
+                            //     input: {
+                            //         startAdornment: <InputAdornment position="start">{getIndex(cf?.unitId)?.label}</InputAdornment>,
+                            //     },
+                            // }}
+                            />;
+                        };
+
+                        return <Grid2 container spacing={0} sx={{ margin: 0, paddingTop: '1rem', }}>
+
+                            <Grid2 size={12} >
+                                <ValorInicialInput />
+                            </Grid2>
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorFinalInput />
+                            </Grid2>
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorNInput />
+                            </Grid2>
+                        </Grid2>
+                    };
+
+                    const ParametrosSmoothstepBell = () => {
+
+                        const funcs = cf?.serialized?.funcs;
+                        const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
+
+                        const ValorInicialInput = () => {
+
+                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(y0).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: parseInt(minX), x1: parseInt(maxX), y0: parseFloat(validInput), y1, N }, { minX, maxX, minY, maxY }).serialize();
+
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor Inicial"
+                                variant="outlined"
+                                fullWidth
+                                slotProps={{ input: { startAdornment: <InputAdornment position="start" children={cf?.label} /> } }}
+                            />;
+                        };
+
+                        const ValorFinalInput = () => {
+
+                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(y1).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = event.target.value;
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1: validInput, N }, { minX, maxX, minY, maxY }).serialize();
+
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor Final"
+                                variant="outlined"
+                                fullWidth
+                                slotProps={{
+                                    input: {
+                                        startAdornment: <InputAdornment position="start">{cf?.label}</InputAdornment>,
+                                    },
+                                }}
+                            />;
+                        };
+
+                        const ValorN1Input = () => {
+
+                            const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(N1).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = parseInt(event.target.value);
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = Math.max(1, Math.min(10, parseFloat(event.target.value)));
+
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1, N1: parseInt(validInput) }, { minX, maxX, minY, maxY }).serialize();
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor N1"
+                                variant="outlined"
+                                fullWidth
+                            // slotProps={{
+                            //     input: {
+                            //         startAdornment: <InputAdornment position="start">{getIndex(cf?.unitId)?.label}</InputAdornment>,
+                            //     },
+                            // }}
+                            />;
+                        };
+                        const ValorN2Input = () => {
+
+                            const { x0, x1, x2, y0, y1, y2, N1, N2, minX, maxX, minY, maxY, underflowVal, overflowVal } = cf?.serialized?.meta;
+                            const [displayedValue, setDisplayedValue] = useState(formatNumber(N2).validInput);
+
+                            const handleChange = (event) => {
+                                let inputValue = parseInt(event.target.value);
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                setDisplayedValue(formattedValue);
+                            };
+
+                            const onBlur = (event) => {
+                                let inputValue = Math.max(1, Math.min(10, parseFloat(event.target.value)));
+
+                                const { formattedValue, validInput } = formatNumber(inputValue);
+                                const func = MathFunctionsTemplates.newSmoothStep({ x0: minX, x1: maxX, y0, y1, N2: parseInt(validInput) }, { minX, maxX, minY, maxY }).serialize();
+                                setDisplayedValue(formattedValue);
+                                dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                            };
+
+                            return <TextField
+                                value={displayedValue}
+                                onChange={handleChange}
+                                onBlur={onBlur}
+                                label="Valor N2"
+                                variant="outlined"
+                                fullWidth
+                            // slotProps={{
+                            //     input: {
+                            //         startAdornment: <InputAdornment position="start">{getIndex(cf?.unitId)?.label}</InputAdornment>,
+                            //     },
+                            // }}
+                            />;
+                        };
+                        return <Grid2 container spacing={0} sx={{ margin: 0, paddingTop: '1rem', }}>
+                            <Grid2 size={12} >
+                                <ValorInicialInput />
+                            </Grid2>
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorFinalInput />
+                            </Grid2>
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorN1Input />
+                            </Grid2>
+                            <Grid2 size={12} sx={{ margin: 0, paddingTop: '1rem', }}>
+                                <ValorN2Input />
+                            </Grid2>
+                        </Grid2>
+                    };
+
+                    const ParametrosCustom = () => {
+
+                        const ValorInput = () => {
+
+                            const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+                            const examples = ["f(x) = 30000", "f(x) = 1000*x + 1000", "f(x) = 1000*pow(x,2) + sin(2*x)"];
+
+                            const [focused, setFocused] = useState(false);
+                            const [displayedValue, setDisplayedValue] = useState(exp);
+                            const [isError, setIsError] = useState(false);
+                            const handleChange = e => setDisplayedValue(e.target.value);
+
+                            const onBlur = (e) => {
+                                try {
+                                    const func = new MathFunction({ exp: e.target.value, minX, maxX, minY, maxY, underflowVal, overflowVal, meta: { label: 'Custom' } }).serialize();
+                                    setIsError(false);
+                                    dispatch(setData({ indexes: indexes.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
+                                } catch (error) {
+                                    setIsError(true);
+                                };
+                                setFocused(false);
+                            };
+
+                            return <Box position="relative">
+                                <TextField
+                                    value={displayedValue}
+                                    onFocus={() => setFocused(true)}
+                                    onChange={handleChange}
+                                    onBlur={onBlur}
+                                    label="Expresión"
+                                    variant="outlined"
+                                    fullWidth
+                                    error={isError}
+                                    slotProps={{
+                                        input: {
+                                            startAdornment: <InputAdornment position="start">{cf?.label + ' f(x) = '}</InputAdornment>,
+                                        },
+                                    }}
+                                />
+                                {focused && (
+                                    <Paper elevation={3} sx={{ position: "absolute", top: "100%", left: 0, mt: 1, width: "100%", zIndex: 10, padding: 1 }} >
+                                        <Typography variant="caption" color="textSecondary">
+                                            Ejemplos:
+                                        </Typography>
+                                        <Box>
+                                            {examples.map((example, index) => (
+                                                <Typography key={index} variant="body2" color="textPrimary">
+                                                    {example}
+                                                </Typography>
+                                            ))}
+                                        </Box>
+                                    </Paper>
+                                )}
+                            </Box>;
+                        };
+
+                        return <Grid2 container spacing={0} sx={{ margin: 0, paddingTop: '1rem', }}>
+                            <Grid2 size={12}>
+                                <ValorInput />
+                            </Grid2>
+                        </Grid2>
+                    };
+
+                    const comps = {
+                        constant: ParametrosConstante,
+                        line: ParametrosLine,
+                        smoothstep: ParametrosSmoothstep,
+                        smoothstepbell: ParametrosSmoothstepBell,
+                        discrete: null,
+                        multi: null,
+                        custom: ParametrosCustom
+                    };
+
+                    const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
+                    const type = meta?.label;
+                    let normilizedType = type?.replaceAll(' ', '').toLowerCase();
+                    const Comp = comps[normilizedType] ?? (() => <></>);
+
+                    return <>
+                        <Comp />
+                        <DisplayTotal />
+                    </>
+                };
+
+                return <>
+                    <TipoCurva />
+                    <ParametrosCurva />
+                </>
+            };
+
+            return (
+                <>
+                    {indexes?.map((cf, i) => {
+                        return <ListItem key={`params-cashflow-${cf.name}-${i}`}><Accordion sx={{ width: '100vw' }}>
+                            <AccordionSummary expandIcon={<ExpandMore />} children={<AccordionHeader cf={cf} i={i} />} />
+                            <AccordionDetails>
+                                <ConfiguracionCurva cf={cf} i={i} />
+                            </AccordionDetails>
+                        </Accordion></ListItem>
+                    })
+                    }
+                </>
+            )
+        }
         return (<Box sx={{ width: '100%', height: { xs: 'flex', sm: 'flex', md: '100%', lg: '100%', xl: '100%' }, flexGrow: 1, pb: '1em', backgroundColor: '#e3e3e3' }}>
             <Header />
             <List>
                 <General />
                 <Cashflows />
+                <Divider />
+                <Indexes />
             </List>
         </Box>);
     };
@@ -1208,7 +1882,7 @@ function Proyecciones() {
             const handleCloseNavMenu = () => setAnchorElNav(null);
 
             return (
-                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, width: '100%', left: 0, backgroundColor: theme.palette.secondary.main}}>
+                <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, width: '100%', left: 0, backgroundColor: theme.palette.secondary.main }}>
 
                     {/* Mobile Version */}
                     <Toolbar sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'flex', md: 'none', lg: 'none', xl: 'none' } }}>
@@ -1218,7 +1892,7 @@ function Proyecciones() {
                                 <MenuIcon />
                             </IconButton>
                             <Menu
-                             sx={{ p:0}}
+                                sx={{ p: 0 }}
                                 id="menu-appbar"
                                 anchorEl={anchorElNav}
                                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
@@ -1386,21 +2060,38 @@ function Proyecciones() {
     };
 
     const IndexesPlot = () => {
-        const { duration } = useSelector(state => state.proyecciones?.data);
-        const range = Array.from({ length: duration }, (_, i) => i)
+        const { duration, indexes } = useSelector(state => state.proyecciones?.data);
         //const range = Array.from({ length: general.period[1] - general.period[0] + 1 }, (_, i) => general.period[0] + i);
         const { newConstant, newLine, newSmoothStep, newSmoothStepBell, newDiscrete, newInstallmentRevenue } = MathFunctionsTemplates;
-        console.log({range})
+
         const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
-        const smoothStep = newSmoothStep(3);
+    
 
-        const series = [
-            { type: 'line', label: 'CAC', data: range.map(x => (0.5 + (x / range.length) / 10) * 3000) },
-            { type: 'line', label: 'Dolar Blue', data: range.map(x => (0.3 + (x / range.length) * (x / range.length) / 5) * 4000) },
-            //{ type: 'line', label: 'Precio M2 Prom', data: range.map(x => (0.5 + newSmoothStep(x / range.length) / 2) * 4000), showMark: true },
-            { type: 'line', label: 'Precio M2 Prom', data: range.map(x => (0.5 + (x / range.length) / 2) * 4000), showMark: true },
-        ];
+        // Configuración de las series
+        const series = indexes.map(cf => {
+            const getPlotData = (cf, duration) => {
+                const func = new MathFunction(cf?.serialized);
+                return Array(duration).fill().map((_, i) => {
+                    let res = 0;
+                    const { minX, maxX } = cf?.serialized;
+                    for (let j = 0; j <= i; j++) {
+                        if (j >= minX && j <= maxX)
+                            res += func.evaluate(j)
+                    }
+                    return res;
+                });
+            };
 
+            return {
+                type: 'line',
+                label: cf.name,
+                id: cf.name,
+                data: getPlotData(cf, duration), // Datos adecuados para cada serie
+                color: cf.color,
+                showMark: true,
+                xAxisId: 'x-axis-id', // Asociar al eje "x-axis-id"
+            };
+        });
         return <div style={{ width: "100%", height: "45vh" }}>
             <div style={{ width: "100%", height: "5vh" }}>
                 <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
@@ -1432,35 +2123,37 @@ function Proyecciones() {
         </div>
     };
     return (
-        <Grid2 container spacing={0} sx={{ 
-            flexGrow: 1, 
-            margin: 0, 
-            padding: 0, 
-            backgroundColor: 'white', 
-          
-            display: 'flex', 
-            flexDirection: 'column', 
+        <Grid2 container spacing={0} sx={{
+            flexGrow: 1,
+            margin: 0,
+            padding: 0,
+            backgroundColor: 'white',
+
+            display: 'flex',
+            flexDirection: 'column',
             overflow: 'hidden' // Asegura que no haya scroll en el contenedor principal
         }}>
             <TopBar />
-    
+
             <Grid2 container sx={{ flexGrow: 1, display: 'flex' }}>
-                <Grid2 size={3} sx={{ 
-                    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' } 
+                <Grid2 size={3} sx={{
+                    display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' }
                 }}>
                     <Parameters />
                 </Grid2>
-    
-                <Grid2 size={{ xs: 12, sm: 12, md: 9, lg: 9, xl: 9 }} sx={{ 
+
+                <Grid2 size={{ xs: 12, sm: 12, md: 9, lg: 9, xl: 9 }} sx={{
                     mt: { xs: '4rem', sm: '4rem', md: '2.5rem', lg: '2.5rem', xl: '2.5rem' },
-                    flexGrow: 1, 
-                  
+                    flexGrow: 1,
+
                 }}>
-                    <Box sx={{ width: '100%', overflowY: 'auto', // Habilita el desplazamiento vertical
-                scrollbarWidth: 'none', // Especifico para Firefox
-                '::WebkitScrollbar': {
-                    display: 'none' // Especifico para WebKit (Chrome, Safari, etc.)
-                }, }}> {/* Contenedor para evitar desbordes */}
+                    <Box sx={{
+                        width: '100%', overflowY: 'auto', // Habilita el desplazamiento vertical
+                        scrollbarWidth: 'none', // Especifico para Firefox
+                        '::WebkitScrollbar': {
+                            display: 'none' // Especifico para WebKit (Chrome, Safari, etc.)
+                        },
+                    }}> {/* Contenedor para evitar desbordes */}
                         <CashFlowPlot />
                         <CashFlowTotalPlot />
                         <IndexesPlot />
@@ -1469,8 +2162,8 @@ function Proyecciones() {
             </Grid2>
         </Grid2>
     );
-    
-    
+
+
 }
 
 export default Proyecciones;
