@@ -71,7 +71,7 @@ const formatNumber = (value) => {
 function Proyecciones() {
 
     const dispatch = useDispatch();
-    
+
     const useIsMobile = () => {
         const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -113,10 +113,10 @@ function Proyecciones() {
             return (<ListItem><Accordion sx={{ width: '100vw' }} >
                 <AccordionSummary expandIcon={<ExpandMore />} children={<Typography children={'General'} fontWeight={600} />} />
                 <AccordionDetails>
-                    <Form schema={schema} validator={validator}   onSubmit={onChange} onError={onError}>
-                       
+                    <Form schema={schema} validator={validator} onSubmit={onChange} onError={onError}>
+
                     </Form>
-                   
+
                 </AccordionDetails>
             </Accordion>
             </ListItem>
@@ -176,7 +176,7 @@ function Proyecciones() {
             };
 
             const ConfiguracionCurva = ({ cf, i }) => {
-             
+
                 const duration = useSelector(state => state.proyecciones?.data?.duration);
                 const TipoCurva = () => {
 
@@ -1933,7 +1933,7 @@ function Proyecciones() {
         const isMobile = useIsMobile();
         const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
         const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
-     
+
         const series = cashflows.map(cf => {
             const getPlotData = (cf, duration) => {
                 const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
@@ -1986,7 +1986,7 @@ function Proyecciones() {
         }
         const handleDownloadPDF = async () => {
             let res = await main(series)
-            console.log({res})
+            console.log({ res })
         }
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
             <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
@@ -1995,8 +1995,8 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Dataset/>} onClick={() => handleDownloadXLS()} />} />
-                    <Tooltip title='Descargar Reporte' children={<IconButton size="large" children={<Description/>} onClick={() => handleDownloadPDF()} />} />
+                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Dataset />} onClick={() => handleDownloadXLS()} />} />
+                    <Tooltip title='Descargar Reporte' children={<IconButton size="large" children={<Description />} onClick={() => handleDownloadPDF()} />} />
                 </Grid2>
             </Grid2>
         </div>;
@@ -2104,8 +2104,6 @@ function Proyecciones() {
 
     const IndexesPlot = () => {
         const { duration, indexes } = useSelector(state => state.proyecciones?.data);
-        //const range = Array.from({ length: general.period[1] - general.period[0] + 1 }, (_, i) => general.period[0] + i);
-        const { newConstant, newLine, newSmoothStep, newSmoothStepBell, newDiscrete, newInstallmentRevenue } = MathFunctionsTemplates;
 
         const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
 
@@ -2135,26 +2133,44 @@ function Proyecciones() {
                 xAxisId: 'x-axis-id', // Asociar al eje "x-axis-id"
             };
         });
-        return <div style={{ width: "100%", height: "45vh" }}>
-            <div style={{ width: "100%", height: "5vh" }}>
-                <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
-                    <Grid2 size={8}>
-                        <Typography variant="h6" component="h2" gutterBottom color='black'>
-                            Índices
-                        </Typography>
-                    </Grid2>
-                    <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
-                        <IconButton size="large">
-                            <Build />
-                        </IconButton>
-                        <IconButton size="large">
-                            <Download />
-                        </IconButton>
-                    </Grid2>
+        const handleDownloadXLS = () => {
+            const columns = xAxis[0]?.data;
+            if (!Array.isArray(columns) || !Array.isArray(series)) {
+                console.error('xAxis y series deben ser arrays válidos', typeof columns);
+                return;
+            }
+
+            // Construir los encabezados asegurando que xAxis contiene solo números
+            const headers = ['Índices', ...columns.map(num => `Mes ${String(num)}`)];
+
+            // Construir los datos asegurando que cada fila tenga la misma longitud
+            const data = series.map(item => [
+                `${item.label} US$`,
+                ...columns.map((_, index) => item.data[index] ?? '-')
+            ]);
+
+            // Crear la hoja de cálculo
+            const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
+
+            // Descargar el archivo Excel
+            XLSX.writeFile(workbook, `Flujo_de_Fondos.xlsx`);
+        }
+        const Header = () => <div style={{ width: "100%", height: "5vh" }}>
+            <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
+                <Grid2 size={8}>
+                    <Typography variant="h6" component="h2" gutterBottom color='black' children={'Índices'} />
                 </Grid2>
-            </div>
-            <div style={{ width: "100%", height: "40vh" }}>
-                <ResponsiveChartContainer series={series} xAxis={xAxis} sx={{ margin: '0.5rem', marginBottom: '1rem', marginTop: '-3rem', paddingTop: '0rem' }}>
+                <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
+                    <IconButton size="large" children={<Build />} />
+                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Dataset />} onClick={() => handleDownloadXLS()} />} />
+                </Grid2>
+            </Grid2>
+        </div>;
+
+        const Plot = () => <div style={{ width: "100%", height: "45vh", padding: '1.5rem' }}>
+            <ResponsiveChartContainer series={series} xAxis={xAxis} sx={{ margin: '0.5rem', marginBottom: '1rem', marginTop: '-3rem', paddingTop: '0rem' }}>
                     <LinePlot />
                     <ChartsXAxis label="Meses" position="bottom" axisId="x-axis-id" />
                     <ChartsYAxis label="USD" />
@@ -2162,7 +2178,11 @@ function Proyecciones() {
                     <ChartsGrid vertical horizontal />
                     <MarkPlot />
                 </ResponsiveChartContainer>
-            </div>
+        </div>;
+      
+        return <div style={{ width: "100%", height: "50vh" }}>
+            <Header />
+            <Plot />
         </div>
     };
 
