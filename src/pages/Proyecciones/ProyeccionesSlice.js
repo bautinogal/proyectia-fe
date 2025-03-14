@@ -62,6 +62,7 @@ const proyeccionesSlice = createSlice({
         error: null,
         message: null,
         data: {
+            title: '',
             duration: 36,
             cashflows: [
                 { name: 'Terreno', serialized: newLine({ a: 100, b: 200 }, { minX: 6, maxX: 16 }).serialize(), unitId: 2, factB: 0.5, IIBB: 0.01, iva: 0.21, color: '#CE4893' },
@@ -89,7 +90,9 @@ const proyeccionesSlice = createSlice({
         cleanError: create.reducer((state, action) => ({ ...state, error: null })),
         cleanMessage: create.reducer((state, action) => ({ ...state, message: null })),
 
-        setData: create.reducer((state, action) => ({ ...state, data: { ...state.data, ...action.payload } })),
+        setData: create.reducer((state, action) => {
+            return { ...state, data: { ...state.data, ...action.payload } };
+        }),
     })
 });
 

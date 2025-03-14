@@ -8,21 +8,22 @@ import { ResponsiveChartContainer, LineChart, LinePlot, ChartsXAxis, ChartsYAxis
 
 import {
     Accordion, AccordionActions, AccordionSummary, AccordionDetails, AppBar, Box, Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, Grid2,
-    IconButton, InputLabel, List, ListItem, Menu, MenuItem, Select, Slider, TextField, Toolbar, Typography, InputAdornment, Paper, Icon,
-
+    IconButton, InputLabel, List, ListItem, Menu, MenuItem, Select, Slider, TextField, Toolbar, Tooltip, Typography, InputAdornment, Paper, Icon
 } from '@mui/material';
 
 import { ChromePicker } from 'react-color';
-import { Add, Build, Circle, Delete, Download, Edit, ExpandMore, ColorLens, Colorize } from '@mui/icons-material';
+import { Add, Build, Circle, Delete, Download, Edit, ExpandMore, ColorLens, Colorize, Description, Dataset } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 import Form from '@rjsf/mui';
 import validator from '@rjsf/validator-ajv8';
 
 import { MathFunction, MathFunctionsTemplates } from "../../mathFunctions/index.js";
-
+import { main } from "../../aiAPI/index.js"
 import { styled } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';
+import * as XLSX from 'xlsx';
+
 import theme from "../../theme.js"
 const CustomFunctionSvgIcon = (props) => {
     const StyledIcon = styled(SvgIcon)(({ theme }) => ({ color: theme.palette.primary.main, fontSize: '2rem' }));
@@ -70,7 +71,18 @@ const formatNumber = (value) => {
 function Proyecciones() {
 
     const dispatch = useDispatch();
+    
+    const useIsMobile = () => {
+        const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+        useEffect(() => {
+            const handleResize = () => setIsMobile(window.innerWidth <= 768);
+            window.addEventListener("resize", handleResize);
+            return () => window.removeEventListener("resize", handleResize);
+        }, []);
+
+        return isMobile;
+    };
     const Parameters = () => {
 
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
@@ -82,12 +94,13 @@ function Proyecciones() {
         </div>;
 
         const General = () => {
+            const { duration, title } = useSelector(state => state.proyecciones?.data);
             const schema = {
                 type: 'object',
-                required: ['title'],
+                required: ['duration'],
                 properties: {
-                    title: { type: 'string', title: 'Nombre', default: 'Nombre del Proyecto' },
-                    duration: { type: 'number', title: 'Duración', default: 36 },
+                    title: { type: 'string', title: 'Nombre', default: title },
+                    duration: { type: 'number', title: 'Duración', default: duration },
                     // estTotalM2: { type: 'number', title: 'M2 Totales', default: 1000 },
                     // estSellableM2: { type: 'number', title: 'M2 Vendibles', default: 800 },
                     // estParkingLots: { type: 'number', title: 'Cocheras', default: 8 },
@@ -95,15 +108,15 @@ function Proyecciones() {
                 },
             };
 
-            const onChange = (e) => dispatch(setData(e.formData));
+            const onChange = (e) => { dispatch(setData(e.formData)) };
             const onError = (e) => console.log('errors');
-
             return (<ListItem><Accordion sx={{ width: '100vw' }} >
                 <AccordionSummary expandIcon={<ExpandMore />} children={<Typography children={'General'} fontWeight={600} />} />
                 <AccordionDetails>
-                    <Form schema={schema} validator={validator} onChange={onChange} onError={onError}>
-                        {''}
+                    <Form schema={schema} validator={validator}   onSubmit={onChange} onError={onError}>
+                       
                     </Form>
+                   
                 </AccordionDetails>
             </Accordion>
             </ListItem>
@@ -113,7 +126,6 @@ function Proyecciones() {
         const Cashflows = () => {
 
             const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
-
             const getIndex = (id) => indexes.find(x => x.id === id);
 
             const AccordionHeader = ({ cf, i }) => {
@@ -164,9 +176,8 @@ function Proyecciones() {
             };
 
             const ConfiguracionCurva = ({ cf, i }) => {
-
+             
                 const duration = useSelector(state => state.proyecciones?.data?.duration);
-
                 const TipoCurva = () => {
 
                     const { newConstant, newLine, newSmoothStep, newSmoothStepBell, newDiscrete, newInstallmentRevenue } = MathFunctionsTemplates;
@@ -543,7 +554,6 @@ function Proyecciones() {
                             };
 
                             const handleCommit = (event, newValue, activeThumb) => {
-                                // console.log({ sliderVal })
                                 const func = MathFunctionsTemplates.newSmoothStep({ x0: sliderVal[0], x1: sliderVal[1], y0, y1, N }, { minX: sliderVal[0], maxX: sliderVal[1], minY, maxY }).serialize();
                                 dispatch(setData({ cashflows: cashflows.map((x, j) => i === j ? { ...x, serialized: func } : x) }));
 
@@ -1920,10 +1930,10 @@ function Proyecciones() {
         )
     };
     const CashFlowPlot = () => {
-
+        const isMobile = useIsMobile();
         const { duration, cashflows, indexes } = useSelector(state => state.proyecciones?.data);
         const xAxis = [{ data: Array.from({ length: duration }, (_, i) => i), id: 'x-axis-id' }];
-
+     
         const series = cashflows.map(cf => {
             const getPlotData = (cf, duration) => {
                 const { minX, maxX, minY, maxY, underflowVal, overflowVal, meta, exp } = cf?.serialized;
@@ -1936,7 +1946,7 @@ function Proyecciones() {
                 label: cf.name,
                 data: getPlotData(cf, duration),
                 color: cf.color,
-                showMark: true
+                showMark: !isMobile
             }
         });
 
@@ -1950,7 +1960,34 @@ function Proyecciones() {
             xAxisId: 'x-axis-id',
             showMark: false, // Opcional: muestra puntos en la línea
         });
+        const handleDownloadXLS = () => {
+            const columns = xAxis[0]?.data;
+            if (!Array.isArray(columns) || !Array.isArray(series)) {
+                console.error('xAxis y series deben ser arrays válidos', typeof columns);
+                return;
+            }
 
+            // Construir los encabezados asegurando que xAxis contiene solo números
+            const headers = ['Categorias', ...columns.map(num => `Mes ${String(num)}`)];
+
+            // Construir los datos asegurando que cada fila tenga la misma longitud
+            const data = series.map(item => [
+                `${item.label} US$`,
+                ...columns.map((_, index) => item.data[index] ?? '-')
+            ]);
+
+            // Crear la hoja de cálculo
+            const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
+
+            // Descargar el archivo Excel
+            XLSX.writeFile(workbook, `Flujo_de_Fondos.xlsx`);
+        }
+        const handleDownloadPDF = async () => {
+            let res = await main(series)
+            console.log({res})
+        }
         const Header = () => <div style={{ width: "100%", height: "5vh" }}>
             <Grid2 container spacing={0} sx={{ margin: 0, padding: 0, backgroundColor: 'white', padding: '0rem', paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', placeItems: 'end' }}>
                 <Grid2 size={8}>
@@ -1958,7 +1995,8 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <IconButton size="large" children={<Download />} />
+                    <Tooltip title='Descargar XLSX' children={<IconButton size="large" children={<Dataset/>} onClick={() => handleDownloadXLS()} />} />
+                    <Tooltip title='Descargar Reporte' children={<IconButton size="large" children={<Description/>} onClick={() => handleDownloadPDF()} />} />
                 </Grid2>
             </Grid2>
         </div>;
@@ -1975,7 +2013,10 @@ function Proyecciones() {
 
             </ResponsiveChartContainer>
         </div>;
-
+        //main(series)
+        // console.log({series: series.reduce((acc,x)=> {
+        //    return acc + `\n ${x.label}: The cost and benefits of this variable along the month are: ${JSON.stringify(x.data?.map((j,i)=> ({ [`Mes ${i}`]: `US $ ${j}`})))}`
+        //   }, "")})
         return <div style={{ width: "100%", height: "50vh" }}>
             <Header />
             <Plot />
@@ -2038,7 +2079,7 @@ function Proyecciones() {
                 </Grid2>
                 <Grid2 size={4} sx={{ textAlignLast: 'end' }}>
                     <IconButton size="large" children={<Build />} />
-                    <IconButton size="large" children={<Download />} />
+                    {/* <IconButton size="large" children={<Download />} /> */}
                 </Grid2>
             </Grid2>
         </div>;
@@ -2124,6 +2165,7 @@ function Proyecciones() {
             </div>
         </div>
     };
+
     return (
         <Grid2 container spacing={0} sx={{
             flexGrow: 1,
