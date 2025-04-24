@@ -56,6 +56,12 @@ export default {
                         dark: '#C66900',
                         contrastText: '#000000',
                     },
+                    neutral: {
+                        main: '#FFFFFF',
+                        light: '#F5F5F5',
+                        dark: '#BDBDBD',
+                        contrastText: '#000000',
+                    },
                 },
                 components: {
                     MuiDataGrid: {

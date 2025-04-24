@@ -24,7 +24,7 @@ async function fetchData() {
         const response = await fetch("/api/dolarito-history", {
             "headers": {
                 "accept": "application/json, text/plain, */*",
-                "auth-client": "0022200edebd6eaee37427532323d88b",
+                "auth-client": "af6eb39b0fcff7eb1141f971b74591f0",
                 "sec-ch-ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
                 "sec-ch-ua-mobile": "?0",
                 "sec-ch-ua-platform": "\"Windows\"",
