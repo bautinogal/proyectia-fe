@@ -12,25 +12,38 @@ const formProyectoInicioSlice = createSlice({
         data: {
             title: '',
             duration: 36,
-            m2construibles: 0,
-            m2vendibles: 0,
-            valorTerrenoTotal: 0,
-            valorM2construibles: 0,
-            valorM2vendibles: 0,
+            m2construibles: 2400,
+            m2vendibles: 1800,
+            valorTerrenoTotal: 900000,
+            valorM2construibles: 1100,
+            valorM2vendibles: 2800,
             //Costos Obra
-            costoPerProyecto: 0,
-            costoPerDirecion: 0,
-            costoPerGerenciamiento: 0,
-            costoJuridicoContableUS: 0,
+            costoPerProyecto: 4,
+            costoPerDirecion: 4,
+            costoPerGerenciamiento: 4,
+            costoJuridicoContableUS: 24000,
             //Comercializacion
-            costoPerComisiones: 0,
+            costoPerComisiones: 2,
             costosMarketing: 0,
             costosVarios: 0,
             //Impuestos
-            costosPerIVAVentas: 0,  
+            costosPerIVAVentas: 8.1,  
             costosPerIIBB: 0,
             costosPerSellos: 0,
             costosPerCheques: 0,
+
+            costosPerIVAventas: 8.1,
+
+            alicuotaIVATerreno: 0,
+            alicuotaIVACostoObra: 10.5,
+            alicuotaIVAProyecto: 21,
+            alicuotaIVADireccion: 21,
+            alicuotaIVAGerenciamiento: 21,
+            alicuotaIVAJuridicoContable: 21,
+            alicuotaIVAComisiones: 21,
+            alicuotaIVAMarketing: 21,
+            alicuotaIVAVarios: 21,
+
 
 
         },

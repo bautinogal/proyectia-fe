@@ -68,7 +68,7 @@ const formatNumber = (value) => {
 
     return { formattedValue, validInput: cleanValidInput };
 };
-
+const moneyFormat = (v) => "US$ " + new Intl.NumberFormat("de-DE", { style: "currency", currency: "ARS" }).format(parseFloat(v)).replace("ARS", "");
 function FormInicioProyecto() {
 
     const dispatch = useDispatch();
@@ -299,8 +299,21 @@ function FormInicioProyecto() {
             costosPerIVAVentas,
             costosPerIIBB,
             costosPerSellos,
-            costosPerCheques, } = useSelector(state => state.formInicioProyecto?.data);
-    
+            costosPerCheques, 
+            costosPerIVAventas,
+        
+            alicuotaIVATerreno,
+            alicuotaIVACostoObra,
+            alicuotaIVAProyecto,
+            alicuotaIVADireccion,
+            alicuotaIVAGerenciamiento,
+            alicuotaIVAJuridicoContable,
+            alicuotaIVAComisiones,
+            alicuotaIVAMarketing,
+            alicuotaIVAVarios,
+
+        } = useSelector(state => state.formInicioProyecto?.data);
+        
         const handleDownloadXLS = () => {
             const columns = [];
             if (!Array.isArray(columns) || !Array.isArray(series)) {
@@ -344,18 +357,239 @@ function FormInicioProyecto() {
         const sizeConstruibles = 3
         const sizeVendibles = 3
         const sizeTotales = 3
+        const valorM2vendiblesSinIVA = valorM2vendibles / (1 + (costosPerIVAVentas / 100))  
+        const ventaTotalM2vendibles = valorM2vendibles * m2vendibles
+        const ventaTotalM2vendiblesSinIVA = valorM2vendiblesSinIVA * m2vendibles
+        const ingresosTotales = ventaTotalM2vendibles
+        const valorTerrenoM2vendible = valorTerrenoTotal / m2vendibles
+        const costoObraTotal = valorM2construibles * m2construibles
+        const valorM2vendiblesTotalesPorTerreno = costoObraTotal / m2vendibles
+        const valorTotalCostoProyecto = costoObraTotal * (costoPerProyecto/100)
+        const valorM2construibleCostoProyecto = valorTotalCostoProyecto / m2construibles
+        const valorM2vendiblesCostoProyecto = valorTotalCostoProyecto / m2vendibles
+
+        const valorTotalCostoGerencia = costoObraTotal * (costoPerGerenciamiento/100)
+        const valorM2construibleCostoGerencia = valorTotalCostoProyecto / m2construibles
+        const valorM2vendiblesCostoGerencia = valorTotalCostoProyecto / m2vendibles
+
+        const valorTotalCostoDireccion = costoObraTotal * (costoPerDirecion/100)
+        const valorM2construibleCostoDireccion = valorTotalCostoProyecto / m2construibles
+        const valorM2vendiblesCostoDireccion = valorTotalCostoProyecto / m2vendibles
+
+        const costoJuridicoContableUSVendible = costoJuridicoContableUS / m2vendibles
+        const costoJuridicoContableUSConstruible = costoJuridicoContableUS / m2construibles
+
+        const costoPerComisionesVendible = valorM2vendibles * (costoPerComisiones / 100)
+        const costoPerComisionesTotal = costoPerComisionesVendible * m2vendibles
+        const costoPerComisionesConstruible = costoPerComisionesTotal / m2construibles
+
+        const costosMarketingVendible = costosMarketing / m2vendibles
+        const costosMarketingConstruible = costosMarketing / m2construibles
+
+        const totalEgresos = valorTerrenoTotal + 
+        costoObraTotal +
+        valorTotalCostoProyecto + 
+        valorTotalCostoDireccion + 
+        valorTotalCostoGerencia + 
+        costoJuridicoContableUS + 
+        costoPerComisionesTotal + 
+        costosMarketing + 
+        costosVarios
+
+        const margenAntesDeImpuestos = ingresosTotales - totalEgresos;
+
+        const costosPerIVAventasTotal = ventaTotalM2vendiblesSinIVA * (costosPerIVAventas / 100)
+        const costosPerIVAventasConstruible = costosPerIVAventasTotal / m2construibles
+        const costosPerIVAventasVendible = costosPerIVAventasTotal / m2vendibles
+
+        const costosPerIVAcostosTotal = valorTerrenoTotal * (alicuotaIVATerreno / 100) +
+        costoObraTotal * (alicuotaIVACostoObra / 100) +
+        valorTotalCostoProyecto * (alicuotaIVAProyecto / 100) +
+        valorTotalCostoDireccion * (alicuotaIVADireccion / 100) +
+        valorTotalCostoGerencia * (alicuotaIVAGerenciamiento / 100) +
+        costoJuridicoContableUS * (alicuotaIVAJuridicoContable / 100) +
+        costoPerComisionesTotal * (alicuotaIVAComisiones / 100) +
+        costosMarketing * (alicuotaIVAMarketing / 100) +
+        costosVarios * (alicuotaIVAVarios / 100) 
+        const costosPerIVAcostosConstruible = costosPerIVAcostosTotal / m2construibles
+        const costosPerIVAcostosVendible = costosPerIVAcostosTotal / m2vendibles
+
+        const netoTotal = Math.max(0, costosPerIVAventasTotal - costosPerIVAcostosTotal)
+        
+        const iibbTotal = ventaTotalM2vendiblesSinIVA * (costosPerIIBB / 100)
+        const iibbVendible = iibbTotal / m2vendibles
+        const iibbConstruible = iibbTotal / m2construibles
+
+        const sellosTotal = ventaTotalM2vendiblesSinIVA * (costosPerSellos / 100)
+        const sellosVendible = sellosTotal / m2vendibles;
+        const sellosConstruible = sellosTotal / m2construibles
+
+        const impuestoChequeTotal = ventaTotalM2vendiblesSinIVA * (costosPerCheques / 100);
+        const impuestoChequeVendible = impuestoChequeTotal / m2vendibles;
+        const impuestoChequeConstruible = impuestoChequeTotal / m2construibles;
+
+        const totalImpuestos = iibbTotal + sellosTotal + impuestoChequeTotal
+        const totalImpuestosConstruible = iibbConstruible + sellosConstruible + impuestoChequeConstruible
+        const totalImpuestosVendible = iibbVendible + sellosVendible + impuestoChequeVendible
+
+        const margenTotalDespuesImpuestos = margenAntesDeImpuestos - netoTotal - totalImpuestos;
+        const margenTotalDespuesImpuestosConstruible = margenTotalDespuesImpuestos / m2construibles;
+        const margenTotalDespuesImpuestosVendible = margenTotalDespuesImpuestos / m2vendibles;
+        
+        const spaceBetweenRows = {marginTop: '2rem'} 
+
         const Desglose = () => <div style={{ width: "95%", height: "100vh", mt: '3rem', display: 'flex', justifySelf: 'center' }}>
-                <Grid2 container spacing={0} sx={{ paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', width: '100%', }}>
+                <Grid2 container spacing={0} alignContent={'flex-start'} sx={{ paddingTop: '1rem', paddingLeft: '2rem', paddingRight: '3rem', marginBottom: '0rem', width: '100%', }}>
                     <Grid2 size={sizeCat} children={<Typography children=''/>} />
-                    <Grid2 size={sizeConstruibles} children={<Typography children='M2 Construibles'/>} />
-                    <Grid2 size={sizeVendibles} children={<Typography children='M2 Vendibles'/>} />
-                    <Grid2 size={sizeTotales} children={<Typography children='Total'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography fontWeight='bold' textAlign={'right'} children='M2 Construibles'/>} />
+                    <Grid2 size={sizeVendibles} children={<Typography fontWeight='bold' textAlign={'right'} children='M2 Vendibles'/>} />
+                    <Grid2 size={sizeTotales} children={<Typography fontWeight='bold' textAlign={'right'} children='Total'/>} />
                 
+                    <Grid2 size={12} children={<Divider/>} />
 
                     <Grid2 size={sizeCat} children={<Typography children='M2'/>} />
-                    <Grid2 size={sizeConstruibles} children={<Typography children={valorM2construibles} />} />
-                    <Grid2 size={sizeVendibles} children={<Typography children={valorM2vendibles} />} />
-                    <Grid2 size={sizeTotales} children={<Typography children=''/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography textAlign={'right'} children={m2construibles} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography textAlign={'right'} children={m2vendibles} />} />
+                    <Grid2 size={sizeTotales} children={<Typography textAlign={'right'} children='-'/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography sx={{...spaceBetweenRows}} fontWeight='bold' children='INGRESOS'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={''} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={''} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={''}/>} />
+
+                    <Grid2 size={12} children={<Divider/>} />
+                    <Grid2 size={sizeCat} children={<Typography children='Precio por M2 Vendible (c/IVA)'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(valorM2vendibles)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(ingresosTotales)}/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography children='sin IVA'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(valorM2vendiblesSinIVA)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={'-'}/>} />
+
+                    <Grid2 size={12} children={<Divider/>} />
+                    <Grid2 size={sizeCat} children={<Typography fontWeight={'bold'} children='Total Ingresos'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} fontWeight='bold' children={moneyFormat(ingresosTotales)}/>} />
+                
+                    <Grid2 size={12} children={<Divider/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography sx={{...spaceBetweenRows}} fontWeight='bold' children='EGRESOS'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={''} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={''} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={''}/>} />
+
+                    <Grid2 size={12} children={<Divider/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography children='Terreno'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(valorTerrenoM2vendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(valorTerrenoTotal)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Costo Obra'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(valorM2construibles)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(valorM2vendiblesTotalesPorTerreno)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(costoObraTotal)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Proyecto'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(valorM2construibleCostoProyecto)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(valorM2vendiblesCostoProyecto)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(valorTotalCostoProyecto)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography  children='Dirección'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(valorM2construibleCostoDireccion)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(valorM2vendiblesCostoDireccion)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(valorTotalCostoDireccion)}/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography children='Gerenciamiento'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(valorM2construibleCostoGerencia)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(valorM2vendiblesCostoGerencia)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(valorTotalCostoGerencia)}/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography children='Abogado + Contador'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(costoJuridicoContableUSConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(costoJuridicoContableUSVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(costoJuridicoContableUS)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Comisiones'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(costoPerComisionesConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(costoPerComisionesVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(costoPerComisionesTotal)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Gastos Marketing'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(costosMarketingConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(costosMarketingVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(costosMarketing)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Gastos varios'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(costosVarios)}/>} />
+
+                    <Grid2 size={12} children={<Divider/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography fontWeight='bold' children='Total Egresos'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} fontWeight='bold' children={moneyFormat(totalEgresos)}/>} />
+
+                    <Grid2 size={12} children={<Divider/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography  sx={{...spaceBetweenRows}} fontWeight='bold' children='Margen Antes de Impuestos'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  sx={{...spaceBetweenRows}} textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography  sx={{...spaceBetweenRows}}  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  sx={{...spaceBetweenRows}} textAlign={'right'} fontWeight='bold' children={moneyFormat(margenAntesDeImpuestos)}/>} />
+                
+                    <Grid2 size={12} children={<Divider/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography  sx={{...spaceBetweenRows}} fontWeight='bold' children='IMPUESTOS'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  sx={{...spaceBetweenRows}} textAlign={'right'} children={''} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography  sx={{...spaceBetweenRows}}  textAlign={'right'} children={''} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  sx={{...spaceBetweenRows}} textAlign={'right'} children={''}/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography children='IVA Ventas'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(costosPerIVAventasConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(costosPerIVAventasVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(costosPerIVAventasTotal)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='IVA Costos'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(costosPerIVAcostosConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(costosPerIVAcostosVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(costosPerIVAcostosTotal)}/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography children='Neto'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(netoTotal)}/>} />
+
+                    <Grid2 size={sizeCat} children={<Typography children='IIBB'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(iibbConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(iibbVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(iibbTotal)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Sellos'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(sellosConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(sellosVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(sellosTotal)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Impuesto al cheque'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={moneyFormat(impuestoChequeConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={moneyFormat(impuestoChequeVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(impuestoChequeTotal)}/>} />
+                
+                    <Grid2 size={sizeCat} children={<Typography children='Total Costos'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography   textAlign={'right'} children={'-'} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  textAlign={'right'} children={moneyFormat(netoTotal)}/>} />
+                
+                
+                    <Grid2 size={sizeCat} children={<Typography  sx={{...spaceBetweenRows}} fontWeight='bold' children='Margen Final'/>} />
+                    <Grid2 size={sizeConstruibles} children={<Typography  sx={{...spaceBetweenRows}}  textAlign={'right'} children={moneyFormat(margenTotalDespuesImpuestosConstruible)} />} />
+                    <Grid2 size={sizeVendibles} children={<Typography  sx={{...spaceBetweenRows}}   textAlign={'right'} children={moneyFormat(margenTotalDespuesImpuestosVendible)} />} />
+                    <Grid2 size={sizeTotales} children={<Typography  sx={{...spaceBetweenRows}}  textAlign={'right'} children={moneyFormat(margenTotalDespuesImpuestos)}/>} />
+                
                 </Grid2>
        
         </div>;
